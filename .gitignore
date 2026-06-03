@@ -1,0 +1,34 @@
+# Environment variables (Crucial - contains Gemini API keys!)
+.env
+*.env
+
+# Python Virtual Environments
+venv/
+ENV/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Node / Frontend dependencies
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Django Local Media and Static
+backend/media/
+backend/staticfiles/
+backend/db.sqlite3
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# IDE / System files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
