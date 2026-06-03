@@ -8,13 +8,10 @@ The UI is designed to look like a clean, practical, internal developer-oriented 
 
 ## Technical Architecture
 
-* **Frontend**: React.js (Vite, Axios API layer, React Router)
-* **Backend**: Django REST Framework (SimpleJWT, psycopg2 database driver, django-storages S3 adapter)
-* **Database**: PostgreSQL (Dockerized or Neon.tech / AWS RDS) with local SQLite fallback
+* **Frontend**: React.js (Vite, Axios API layer, React Router) &rarr; Hosted on **Vercel**
+* **Backend**: Django REST Framework (SimpleJWT, psycopg2 database driver) &rarr; Hosted on **Render.com**
+* **Database**: PostgreSQL &rarr; Hosted on **Neon.tech** (with local SQLite fallback for testing)
 * **AI Integration**: Google Gemini API via official `google-genai` SDK (`gemini-2.5-flash` model)
-* **Cloud Storage**: AWS S3 (for uploaded transcripts) with local filesystem fallback
-* **Containerization**: Docker & Docker Compose
-* **Hosting Options**: Vercel (Frontend) + Render.com (Backend) OR AWS EC2
 
 ---
 
@@ -28,14 +25,14 @@ DJANGO_SECRET_KEY=django-insecure-meeting-summarizer-key-12345
 DJANGO_DEBUG=True
 DJANGO_ALLOWED_HOSTS=*
 
-# Database Configuration (Leave blank to use local SQLite)
-DB_HOST=
-DB_NAME=
-DB_USER=
-DB_PASSWORD=
+# Database Configuration (Leave blank to use local SQLite, or fill with your pgAdmin credentials)
+DB_HOST=127.0.0.1
+DB_NAME=meetings_db
+DB_USER=postgres
+DB_PASSWORD=your_pgadmin_password
 DB_PORT=5432
 
-# Cloud Storage (Leave blank to use local filesystem)
+# Cloud Storage (Leave blank to save files directly to your computer)
 AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_STORAGE_BUCKET_NAME=
@@ -58,7 +55,7 @@ source venv/bin/activate
 # Install requirements
 pip install -r backend/requirements.txt
 
-# Run migrations to initialize the database
+# Run migrations to initialize the database tables
 python backend/manage.py migrate
 
 # Start backend server
@@ -82,9 +79,9 @@ npm run dev
 
 ---
 
-## Option A: Deployment on Vercel + Render + Neon (Recommended & Free)
+## Cloud Deployment Guide (Vercel + Render + Neon)
 
-This is the easiest way to deploy the app for free without configuring virtual servers.
+Follow these steps to deploy the application in production using our serverless database and hosting stack.
 
 ### Step 1: Create a PostgreSQL Database (Neon.tech)
 1. Sign up at [Neon.tech](https://neon.tech/) and create a free project.
@@ -110,45 +107,8 @@ This is the easiest way to deploy the app for free without configuring virtual s
 1. Sign up on [Vercel.com](https://vercel.com/) and import your GitHub repository.
 2. Configure settings:
    * **Root Directory**: Select **`frontend`**
-   * **Framework Preset**: Vite
+   * **Framework Preset**: Vite (detected automatically)
 3. Add **Environment Variables**:
    * **Key**: `VITE_API_URL`
    * **Value**: *Your Render URL (e.g. `https://your-backend.onrender.com` without a trailing `/`)*
 4. Click **Deploy**. (React Router client-side rewrites are handled automatically by `frontend/vercel.json`).
-
----
-
-## Option B: Deploying with Docker Compose (Local or Cloud Server)
-
-To build and run the entire stack (PostgreSQL, Django, React, and Nginx proxy) in one command:
-
-1. Configure `.env` in the root folder.
-2. Start the services:
-   ```bash
-   docker compose up --build -d
-   ```
-3. Open `http://localhost` to access the application.
-
----
-
-## Option C: Deploying to AWS EC2
-
-### Step 1: Spin up Instance
-1. Launch an EC2 Instance with **Ubuntu**.
-2. Open ports **`22` (SSH)** and **`80` (HTTP)** in the Security Group.
-
-### Step 2: Set up Environment
-SSH into your instance and install Docker:
-```bash
-sudo apt-get update && sudo apt-get install -y docker.io docker-compose-plugin
-sudo usermod -aG docker ubuntu
-# Log out and log back in to apply docker group
-```
-
-### Step 3: Deploy and Start
-1. Clone the project onto the EC2 instance.
-2. Create a `.env` file at the root folder containing your credentials.
-3. Start the containers:
-   ```bash
-   docker compose up --build -d
-   ```
